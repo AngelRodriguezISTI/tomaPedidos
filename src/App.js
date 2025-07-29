@@ -5,39 +5,59 @@ const CarniceriaApp = () => {
   const [productos, setProductos] = useState([
     { 
       id: 1, 
-      nombre: 'Carne de Res (kg)', 
-      precio: 25.00,
-      imagen: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400&h=300&fit=crop'
+      nombre: 'DUO TIZNE',
+      categoria: 'Paquete', 
+      precio: 230.00,
+      imagen: 'public/images/2.png'
     },
     { 
       id: 2, 
-      nombre: 'Pollo Entero (kg)', 
-      precio: 18.00,
-      imagen: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=300&fit=crop'
+      nombre: 'TIZNE CLASSIC',
+      categoria: 'Paquete', 
+      precio: 280.00,
+      imagen: 'public/images/3.png'
     },
     { 
       id: 3, 
-      nombre: 'Carne de Cerdo (kg)', 
-      precio: 22.00,
-      imagen: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400&h=300&fit=crop'
+      nombre: 'MEGA TIZNE',
+      categoria: 'Paquete',  
+      precio: 560.00,
+      imagen: 'public/images/4.png'
     },
     { 
       id: 4, 
-      nombre: 'Costillas (kg)', 
-      precio: 28.00,
-      imagen: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop'
+      nombre: 'Arrachera 1 kg',
+      categoria: 'Corte', 
+      precio: 170.00,
+      imagen: 'public/images/ARRACHERA.webp'
     },
     { 
       id: 5, 
-      nombre: 'Chorizo (kg)', 
-      precio: 35.00,
-      imagen: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop'
+      nombre: 'Asada 1 kg',
+      categoria: 'Corte', 
+      precio: 150.00,
+      imagen: 'public/images/ASADA.jpg'
     },
     { 
       id: 6, 
-      nombre: 'Carne Molida (kg)', 
-      precio: 24.00,
-      imagen: 'https://images.unsplash.com/photo-1588347818663-4560c99f4a61?w=400&h=300&fit=crop'
+      nombre: 'Salchichon', 
+      categoria: 'Embutido',
+      precio: 9.00,
+      imagen: 'public/images/SALCHICHON.png'
+    },
+    {
+      id: 7,
+      nombre: 'Chorizo',
+      categoria: 'Embutido',
+      precio: 9.00,
+      imagen: 'public/images/CHORIZO.jpg'
+    },
+    {
+      id: 8,
+      nombre: 'Chorizo Español',
+      categoria: 'Embutido',
+      precio: 18.00,
+      imagen: 'public/images/ESPAÑOL.jpg'
     }
   ]);
   
