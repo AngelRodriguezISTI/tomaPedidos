@@ -1,69 +1,180 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 const CarniceriaApp = () => {
-  const [productos, setProductos] = useState([
-    { 
-      id: 1, 
-      nombre: 'DUO TIZNE',
-      categoria: 'Paquete', 
-      precio: 230.00,
-      imagen: 'public/images/2.png'
-    },
-    { 
-      id: 2, 
-      nombre: 'TIZNE CLASSIC',
-      categoria: 'Paquete', 
-      precio: 280.00,
-      imagen: 'public/images/3.png'
-    },
-    { 
-      id: 3, 
-      nombre: 'MEGA TIZNE',
-      categoria: 'Paquete',  
-      precio: 560.00,
-      imagen: 'public/images/4.png'
-    },
-    { 
-      id: 4, 
-      nombre: 'Arrachera 1 kg',
-      categoria: 'Corte', 
-      precio: 170.00,
-      imagen: 'public/images/ARRACHERA.webp'
-    },
-    { 
-      id: 5, 
-      nombre: 'Asada 1 kg',
-      categoria: 'Corte', 
-      precio: 150.00,
-      imagen: 'public/images/ASADA.jpg'
-    },
-    { 
-      id: 6, 
-      nombre: 'Salchichon', 
-      categoria: 'Embutido',
-      precio: 9.00,
-      imagen: 'public/images/SALCHICHON.png'
-    },
-    {
-      id: 7,
-      nombre: 'Chorizo',
-      categoria: 'Embutido',
-      precio: 9.00,
-      imagen: 'public/images/CHORIZO.jpg'
-    },
-    {
-      id: 8,
-      nombre: 'Chorizo Español',
-      categoria: 'Embutido',
-      precio: 18.00,
-      imagen: 'public/images/ESPAÑOL.jpg'
-    }
-  ]);
   
+  // Función para cargar datos del localStorage
+  const cargarDatosGuardados = () => {
+    try {
+      const ventasGuardadas = localStorage.getItem('tiznados-ventas');
+      const productosGuardados = localStorage.getItem('tiznados-productos');
+      const pedidosGuardados = localStorage.getItem('tiznados-pedidos-pendientes');
+      
+      return {
+        ventas: ventasGuardadas ? JSON.parse(ventasGuardadas) : [],
+        productos: productosGuardados ? JSON.parse(productosGuardados) : [
+          { 
+            id: 1, 
+            nombre: 'DUO TIZNE',
+            categoria: 'Paquete', 
+            precio: 230.00,
+            imagen: '/images/2.png'
+          },
+          { 
+            id: 2, 
+            nombre: 'TIZNE CLASSIC',
+            categoria: 'Paquete', 
+            precio: 280.00,
+            imagen: '/images/3.png'
+          },
+          { 
+            id: 3, 
+            nombre: 'MEGA TIZNE',
+            categoria: 'Paquete',  
+            precio: 560.00,
+            imagen: '/images/4.png'
+          },
+          { 
+            id: 4, 
+            nombre: 'Arrachera 1 kg',
+            categoria: 'Corte', 
+            precio: 170.00,
+            imagen: '/images/ARRACHERA.webp'
+          },
+          { 
+            id: 5, 
+            nombre: 'Asada 1 kg',
+            categoria: 'Corte', 
+            precio: 150.00,
+            imagen: '/images/ASADA.jpg'
+          },
+          { 
+            id: 6, 
+            nombre: 'Salchichon', 
+            categoria: 'Embutido',
+            precio: 9.00,
+            imagen: '/images/SALCHICHON.png'
+          },
+          {
+            id: 7,
+            nombre: 'Chorizo',
+            categoria: 'Embutido',
+            precio: 9.00,
+            imagen: '/images/CHORIZO.jpg'
+          },
+          {
+            id: 8,
+            nombre: 'Chorizo Español',
+            categoria: 'Embutido',
+            precio: 18.00,
+            imagen: '/images/ESPAÑOL.jpg'
+          }
+        ],
+        pedidosPendientes: pedidosGuardados ? JSON.parse(pedidosGuardados) : []
+      };
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+      return {
+        ventas: [],
+        productos: [],
+        pedidosPendientes: []
+      };
+    }
+  };
+
+  // Función para guardar en localStorage
+  const guardarEnStorage = (key, data) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      console.error('Error guardando datos:', error);
+    }
+  };
+
+  // Función para exportar ventas a Excel (CSV)
+  const exportarVentasExcel = () => {
+    if (ventas.length === 0) {
+      alert('No hay ventas para exportar');
+      return;
+    }
+
+    // Preparar datos para Excel
+    const datosExcel = [];
+    
+    // Encabezados
+    datosExcel.push([
+      'Fecha',
+      'Cliente', 
+      'Producto',
+      'Cantidad',
+      'Precio Unitario',
+      'Subtotal',
+      'Total Venta',
+      'Método Pago',
+      'Pago Recibido',
+      'Cambio'
+    ]);
+
+    // Datos de ventas
+    ventas.forEach(venta => {
+      venta.productos.forEach((producto, index) => {
+        datosExcel.push([
+          venta.fecha,
+          venta.cliente,
+          producto.nombre,
+          producto.cantidad,
+          `$${producto.precio.toFixed(2)}`,
+          `$${(producto.precio * producto.cantidad).toFixed(2)}`,
+          index === 0 ? `$${venta.total.toFixed(2)}` : '', // Solo mostrar total en primera fila
+          index === 0 ? venta.metodoPago : '',
+          index === 0 ? `$${venta.pago.toFixed(2)}` : '',
+          index === 0 ? `$${venta.cambio.toFixed(2)}` : ''
+        ]);
+      });
+      
+      // Línea separadora entre ventas
+      datosExcel.push(['', '', '', '', '', '', '', '', '', '']);
+    });
+
+    // Agregar totales al final
+    const totalDia = ventas.reduce((total, venta) => total + venta.total, 0);
+    const totalVentas = ventas.length;
+    
+    datosExcel.push(['', '', '', '', '', '', '', '', '', '']);
+    datosExcel.push(['RESUMEN DEL DÍA', '', '', '', '', '', '', '', '', '']);
+    datosExcel.push(['Total de ventas:', totalVentas, '', '', '', '', '', '', '', '']);
+    datosExcel.push(['Total en dinero:', `$${totalDia.toFixed(2)}`, '', '', '', '', '', '', '', '']);
+
+    // Crear CSV
+    const csvContent = datosExcel.map(row => 
+      row.map(cell => 
+        typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+      ).join(',')
+    ).join('\n');
+
+    // Descargar archivo
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const fecha = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Ventas_Tiznados_${fecha}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  // Inicializar estados con datos guardados
+  const datosIniciales = cargarDatosGuardados();
+  
+  const [productos, setProductos] = useState(datosIniciales.productos);
   const [pedidoActual, setPedidoActual] = useState([]);
-  const [pedidosPendientes, setPedidosPendientes] = useState([]);
-  const [ventas, setVentas] = useState([]);
+  const [pedidosPendientes, setPedidosPendientes] = useState(datosIniciales.pedidosPendientes);
+  const [ventas, setVentas] = useState(datosIniciales.ventas);
   const [vistaActual, setVistaActual] = useState('pedidos');
   
   const [nuevoProducto, setNuevoProducto] = useState({ nombre: '', precio: '', imagen: '' });
@@ -77,6 +188,19 @@ const CarniceriaApp = () => {
   const [pedidoPagando, setPedidoPagando] = useState(null);
   const [montoPagoPendiente, setMontoPagoPendiente] = useState('');
 
+  // useEffect para guardar automáticamente los datos
+  useEffect(() => {
+    guardarEnStorage('tiznados-ventas', ventas);
+  }, [ventas]);
+
+  useEffect(() => {
+    guardarEnStorage('tiznados-productos', productos);
+  }, [productos]);
+
+  useEffect(() => {
+    guardarEnStorage('tiznados-pedidos-pendientes', pedidosPendientes);
+  }, [pedidosPendientes]);
+
   const totalPedido = pedidoActual.reduce((total, item) => total + (item.precio * item.cantidad), 0);
 
   const agregarProducto = () => {
@@ -84,8 +208,9 @@ const CarniceriaApp = () => {
       const producto = {
         id: Date.now(),
         nombre: nuevoProducto.nombre,
+        categoria: 'Personalizado',
         precio: parseFloat(nuevoProducto.precio),
-        imagen: nuevoProducto.imagen || 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop'
+        imagen: nuevoProducto.imagen || '/images/default.jpg'
       };
       setProductos([...productos, producto]);
       setNuevoProducto({ nombre: '', precio: '', imagen: '' });
@@ -140,7 +265,7 @@ const CarniceriaApp = () => {
         nombre: nombre,
         precio: parseFloat(precio),
         cantidad: parseFloat(cantidad),
-        imagen: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop'
+        imagen: '/images/default.jpg'
       };
       setPedidoActual([...pedidoActual, productoPersonalizado]);
     }
@@ -273,6 +398,16 @@ const CarniceriaApp = () => {
     setMetodoPago('efectivo');
   };
 
+  // Función para limpiar todos los datos (opcional)
+  const limpiarTodosLosDatos = () => {
+    if (window.confirm('¿Estás seguro de que quieres borrar TODOS los datos? Esta acción no se puede deshacer.')) {
+      localStorage.removeItem('tiznados-ventas');
+      localStorage.removeItem('tiznados-productos');
+      localStorage.removeItem('tiznados-pedidos-pendientes');
+      window.location.reload();
+    }
+  };
+
   const VentaCompletada = ({ venta }) => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 border-4" style={{ borderColor: '#B70101' }}>
@@ -390,12 +525,15 @@ const CarniceriaApp = () => {
                         alt={producto.nombre}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop';
+                          e.target.src = '/images/default.jpg';
                         }}
                       />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-lg" style={{ color: '#563300' }}>{producto.nombre}</h3>
+                      {producto.categoria && (
+                        <p className="text-sm text-gray-500">{producto.categoria}</p>
+                      )}
                       <p className="text-2xl font-bold" style={{ color: '#B70101' }}>${producto.precio.toFixed(2)}</p>
                     </div>
                     <button
@@ -451,7 +589,7 @@ const CarniceriaApp = () => {
                       <div key={`${item.id}-${item.nombre}`} className="flex items-center p-4 border-2 rounded-xl" style={{ borderColor: '#f0f0f0' }}>
                         <div className="w-16 h-16 rounded-lg overflow-hidden mr-4">
                           <img 
-                            src={item.imagen || 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop'} 
+                            src={item.imagen || '/images/default.jpg'} 
                             alt={item.nombre}
                             className="w-full h-full object-cover"
                           />
@@ -720,11 +858,14 @@ const CarniceriaApp = () => {
                         alt={producto.nombre}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop';
+                          e.target.src = '/images/default.jpg';
                         }}
                       />
                     </div>
                     <h3 className="font-bold text-lg mb-2" style={{ color: '#563300' }}>{producto.nombre}</h3>
+                    {producto.categoria && (
+                      <p className="text-sm text-gray-500 mb-2">{producto.categoria}</p>
+                    )}
                     <p className="text-2xl font-bold mb-4" style={{ color: '#B70101' }}>${producto.precio.toFixed(2)}</p>
                     <div className="flex space-x-2">
                       <button
@@ -754,14 +895,24 @@ const CarniceriaApp = () => {
             <div className="p-6 rounded-t-2xl" style={{ backgroundColor: '#563300' }}>
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-white">📊 Ventas del Día</h2>
-                {ventas.length > 0 && (
-                  <div className="text-right bg-white rounded-xl p-4">
-                    <p className="text-sm text-gray-600">Total del día</p>
-                    <p className="text-3xl font-bold" style={{ color: '#B70101' }}>
-                      ${ventas.reduce((total, venta) => total + venta.total, 0).toFixed(2)}
-                    </p>
-                  </div>
-                )}
+                <div className="flex space-x-4">
+                  {ventas.length > 0 && (
+                    <>
+                      <button
+                        onClick={exportarVentasExcel}
+                        className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 transition-all transform hover:scale-105 flex items-center"
+                      >
+                        📊 Exportar Excel
+                      </button>
+                      <div className="text-right bg-white rounded-xl p-4">
+                        <p className="text-sm text-gray-600">Total del día</p>
+                        <p className="text-3xl font-bold" style={{ color: '#B70101' }}>
+                          ${ventas.reduce((total, venta) => total + venta.total, 0).toFixed(2)}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             <div className="p-6">
@@ -940,6 +1091,18 @@ const CarniceriaApp = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Botón de limpiar datos (solo para desarrollo) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 left-4">
+          <button
+            onClick={limpiarTodosLosDatos}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700"
+          >
+            🗑️ Limpiar Datos
+          </button>
         </div>
       )}
     </div>
