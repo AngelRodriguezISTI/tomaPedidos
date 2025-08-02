@@ -398,6 +398,14 @@ const CarniceriaApp = () => {
     setMetodoPago('efectivo');
   };
 
+  // Función para eliminar una venta
+  const eliminarVenta = (ventaId) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta venta? Esta acción no se puede deshacer.')) {
+      setVentas(ventas.filter(v => v.id !== ventaId));
+      alert('Venta eliminada correctamente');
+    }
+  };
+
   // Función para limpiar todos los datos (opcional)
   const limpiarTodosLosDatos = () => {
     if (window.confirm('¿Estás seguro de que quieres borrar TODOS los datos? Esta acción no se puede deshacer.')) {
@@ -451,7 +459,7 @@ const CarniceriaApp = () => {
       }}>
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-2">🔥 TIZNADOS MX</h1>
-          <p className="text-xl opacity-90">Sistema de Ventas Profesional</p>
+          <p className="text-xl opacity-90">Toma de pedidos para ventas diarias</p>
         </div>
       </div>
 
@@ -904,11 +912,23 @@ const CarniceriaApp = () => {
                       >
                         📊 Exportar Excel
                       </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm('¿Estás seguro de que quieres eliminar TODAS las ventas del día? Esta acción no se puede deshacer.')) {
+                            setVentas([]);
+                            alert('Todas las ventas han sido eliminadas');
+                          }
+                        }}
+                        className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-all transform hover:scale-105 flex items-center"
+                      >
+                        🗑️ Limpiar Día
+                      </button>
                       <div className="text-right bg-white rounded-xl p-4">
                         <p className="text-sm text-gray-600">Total del día</p>
                         <p className="text-3xl font-bold" style={{ color: '#B70101' }}>
                           ${ventas.reduce((total, venta) => total + venta.total, 0).toFixed(2)}
                         </p>
+                        <p className="text-sm text-gray-600">{ventas.length} ventas</p>
                       </div>
                     </>
                   )}
@@ -939,13 +959,22 @@ const CarniceriaApp = () => {
                             {venta.metodoPago === 'efectivo' ? '💵 Efectivo' : '💳 Transferencia'}
                           </span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold" style={{ color: '#B70101' }}>
-                            ${venta.total.toFixed(2)}
-                          </p>
-                          {venta.metodoPago === 'efectivo' && (
-                            <p className="text-gray-600">Cambio: ${venta.cambio.toFixed(2)}</p>
-                          )}
+                        <div className="text-right flex items-center space-x-4">
+                          <div>
+                            <p className="text-2xl font-bold" style={{ color: '#B70101' }}>
+                              ${venta.total.toFixed(2)}
+                            </p>
+                            {venta.metodoPago === 'efectivo' && (
+                              <p className="text-gray-600">Cambio: ${venta.cambio.toFixed(2)}</p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => eliminarVenta(venta.id)}
+                            className="bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-all transform hover:scale-105"
+                            title="Eliminar venta"
+                          >
+                            <Trash2 />
+                          </button>
                         </div>
                       </div>
                       <div className="p-4 rounded-xl" style={{ backgroundColor: '#f8f5f0' }}>
